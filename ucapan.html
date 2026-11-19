@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎂 Ucapan Spesial Buat Kamu!</title>
+<meta name="description" content="Sebuah ucapan ulang tahun yang dibuat khusus untukmu. Selamat ulang tahun!">
+<meta name="theme-color" content="#ff4d6d">
+
+<!-- Open Graph biar preview di WA keluar cantik -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="🎂 Ada Ucapan Spesial Buat Kamu!">
+<meta property="og:description" content="Seseorang mengirim ucapan ulang tahun untukmu. Klik untuk membuka kejutan!">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+</head>
+<body class="ucapan-body theme-romantis">
+
+<!-- Confetti canvas -->
+<canvas id="confettiCanvas"></canvas>
+
+<!-- Layer dekorasi melayang (hati/balon/bintang) -->
+<div class="deco-layer" id="decoLayer"></div>
+
+<!-- Tombol toggle musik -->
+<button class="music-toggle" id="musicToggle" onclick="toggleMusic()" title="Klik buat play/stop musik">🎵</button>
+
+<!-- Kartu ucapan utama -->
+<div class="ucapan-card" id="ucapanCard">
+
+  <!-- Foto penerima (conditional) -->
+  <div class="photo-frame empty" id="photoFrame"></div>
+
+  <div class="emoji" id="emoji">💖</div>
+  <h1>Hai, <span id="tampilUntuk">Kamu</span>!</h1>
+  <p class="lead" id="subTitle" style="font-size:.95rem;margin-top:4px">Ada ucapan spesial nih buat kamu ✨</p>
+
+  <!-- Countdown timer (conditional) -->
+  <div class="countdown hidden" id="countdown">
+    <div class="countdown-label" id="cdLabel">⏰ Menuju hari spesialmu:</div>
+    <div class="countdown-grid" id="cdGrid">
+      <div class="countdown-box"><div class="num" id="cdDays">00</div><div class="lbl">hari</div></div>
+      <div class="countdown-box"><div class="num" id="cdHours">00</div><div class="lbl">jam</div></div>
+      <div class="countdown-box"><div class="num" id="cdMins">00</div><div class="lbl">menit</div></div>
+      <div class="countdown-box"><div class="num" id="cdSecs">00</div><div class="lbl">detik</div></div>
+    </div>
+  </div>
+
+  <p class="ucapan-message" id="tampilUcapan"><span class="cursor">​</span></p>
+
+  <!-- Kue ultah dengan lilin interaktif -->
+  <div class="cake-section">
+    <svg class="cake-svg" id="cakeSvg" viewBox="0 0 200 180" onclick="blowCandle()" role="img" aria-label="Klik untuk meniup lilin">
+      <rect x="96" y="60" width="8" height="34" rx="2" fill="#ff8fab"/>
+      <line x1="100" y1="60" x2="100" y2="52" stroke="#444" stroke-width="2"/>
+      <g class="flame" id="flame">
+        <ellipse cx="100" cy="46" rx="5" ry="9" fill="#ff9a00"/>
+        <ellipse cx="100" cy="44" rx="3" ry="6" fill="#ffd700"/>
+        <ellipse cx="100" cy="42" rx="1.5" ry="3" fill="#fffacd"/>
+      </g>
+      <rect x="30" y="100" width="140" height="55" rx="10" fill="#fff0f3"/>
+      <rect x="30" y="100" width="140" height="10" fill="#ff4d6d"/>
+      <rect x="50" y="80" width="100" height="25" rx="8" fill="#ffe6ee"/>
+      <rect x="50" y="80" width="100" height="6" fill="#ff8fab"/>
+      <circle cx="55" cy="118" r="3" fill="#ff4d6d"/>
+      <circle cx="75" cy="118" r="3" fill="#ff9a00"/>
+      <circle cx="100" cy="118" r="3" fill="#ff4d6d"/>
+      <circle cx="125" cy="118" r="3" fill="#ff9a00"/>
+      <circle cx="145" cy="118" r="3" fill="#ff4d6d"/>
+      <circle cx="70" cy="138" r="2.5" fill="#fff"/>
+      <circle cx="100" cy="138" r="2.5" fill="#fff"/>
+      <circle cx="130" cy="138" r="2.5" fill="#fff"/>
+    </svg>
+    <p class="cake-hint" id="cakeHint">👆 Klik kuenya buat tiup lilin!</p>
+  </div>
+
+  <button class="celebrate-btn" id="celebrateBtn" onclick="bigCelebrate()">🎉 Rayakan Lagi!</button>
+
+  <!-- Video ucapan (conditional) -->
+  <div class="video-section hidden" id="videoSection">
+    <div class="video-title" id="videoTitle">🎥 Video ucapan untukmu:</div>
+    <div class="video-wrap" id="videoWrap"></div>
+  </div>
+
+  <p class="dari">Dari: <b id="tampilDari">Seseorang</b></p>
+
+  <!-- Share buttons -->
+  <div class="share-row">
+    <button class="share-btn wa" onclick="shareWA()">💬 WhatsApp</button>
+    <button class="share-btn copy" onclick="shareCopy()">📋 Copy Link</button>
+    <button class="share-btn fb" onclick="shareFB()">📘 Facebook</button>
+    <button class="share-btn tw" onclick="shareTW()">🐦 Twitter</button>
+  </div>
+
+  <div class="ucapan-divider" id="gbDivider"></div>
+
+  <!-- Guestbook (conditional) -->
+  <div class="guestbook hidden" id="guestbook">
+    <h3>💌 Buku Tamu</h3>
+    <p class="gb-sub">Tulis ucapan tambahan buat <b id="gbUntuk">Kamu</b>!</p>
+    <form class="gb-form" id="gbForm" onsubmit="return submitComment(event)">
+      <input type="text" id="gbName" placeholder="Nama kamu" maxlength="30" autocomplete="off">
+      <textarea id="gbMsg" placeholder="Tulis ucapan / doa buat yang ultah..." maxlength="300" oninput="updateGbCount()"></textarea>
+      <p class="hint" id="gbCharCount" style="text-align:right;margin:2px 0 8px">0 / 300</p>
+      <button type="submit" class="btn btn-primary btn-sm" style="width:100%">✍️ Kirim Ucapan</button>
+    </form>
+    <div class="gb-list" id="gbList"></div>
+    <p class="gb-count" id="gbCount"></p>
+    <p style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:8px">
+      💡 Komentar disimpan di browser kamu. Untuk guestbook yang terlihat semua orang, hubungi admin (lihat README).
+    </p>
+  </div>
+
+  <p style="font-size:.7rem;color:var(--muted);margin-top:18px">
+    Dibuat dengan ❤️ via <a href="index.html" style="color:var(--primary);font-weight:600">WishLink</a>
+  </p>
+</div>
+
+<script>
+/* ============================================================
+   UCAPAN PAGE v2 — Animasi + foto + video + countdown + guestbook + share
+   ============================================================ */
+
+// ----- KONFIGURASI TEMA -----
+var TEMA = {
+  romantis: {
+    emoji:"💖", label:"Tema Romantis 💖", sub:"Selamat ulang tahun, sayang 💕",
+    bodyClass:"theme-romantis",
+    deco:["💖","💕","💗","❤️","🌹"],
+    confetti:["#ff4d6d","#ff8fab","#ff758f","#ffd6e0","#ffb3c6"],
+    music:"sine"
+  },
+  lucu: {
+    emoji:"🎉", label:"Tema Lucu / Heboh 🎉", sub:"YEE HBD! MAKIN TUA AE LO 😆",
+    bodyClass:"theme-lucu",
+    deco:["🎉","🎊","🥳","💥","⭐","🎈"],
+    confetti:["#ff9a00","#ff2d55","#22c1c3","#fdbb2d","#a8e6cf"],
+    music:"square"
+  },
+  elegan: {
+    emoji:"✨", label:"Tema Elegan ✨", sub:"Selamat merayakan hari istimewa Anda",
+    bodyClass:"theme-elegan",
+    deco:["✨","💫","🕊️","🤍","⭐"],
+    confetti:["#d4af37","#f5e6c8","#2c2c2c","#c9a55c","#fff8dc"],
+    music:"triangle"
+  },
+  anak: {
+    emoji:"🧸", label:"Tema Anak-anak 🧸", sub:"HBD yaa! Makin pintar & sehat terus 🎈",
+    bodyClass:"theme-anak",
+    deco:["🎈","🧁","🧸","⭐","🍭","🌈"],
+    confetti:["#22c1c3","#fdbb2d","#ff9a00","#a8e6cf","#ffaaa5"],
+    music:"square"
+  },
+  keluarga: {
+    emoji:"💐", label:"Tema Keluarga 💐", sub:"Selamat ulang tahun, semoga bahagia selalu",
+    bodyClass:"theme-keluarga",
+    deco:["💐","🌸","🌼","🤍","💫"],
+    confetti:["#6a8eff","#a06bff","#ffb3d9","#d4e4ff","#e8d4ff"],
+    music:"sine"
+  }
+};
+
+// ----- BACA PARAMETER URL -----
+var params = new URLSearchParams(window.location.search);
+var untuk = params.get("untuk") || "Kamu";
+var dari  = params.get("dari")  || "Seseorang";
+var ucap  = params.get("ucapan") || "Selamat ulang tahun! Semoga semua mimpi-mimpimu jadi nyata. 🎂";
+var temaKey = (params.get("tema") || "romantis").toLowerCase();
+if(!TEMA[temaKey]) temaKey = "romantis";
+var tema = TEMA[temaKey];
+
+// New params
+var fotoUrl    = params.get("foto") || "";
+var videoUrl   = params.get("video") || "";
+var gbEnabled  = (params.get("guestbook") || "1") !== "0"; // default ON
+var tanggalStr = params.get("tanggal") || "";
+
+// ----- APLIKASI TEMA -----
+document.body.className = "ucapan-body " + tema.bodyClass;
+document.getElementById("emoji").innerText = tema.emoji;
+document.getElementById("tampilUntuk").innerText = untuk;
+document.getElementById("tampilDari").innerText  = dari;
+document.getElementById("subTitle").innerText   = tema.sub;
+document.getElementById("gbUntuk").innerText    = untuk;
+document.title = "🎂 Ucapan buat " + untuk + "!";
+
+// ----- TYPEWRITER EFFECT -----
+var msgEl = document.getElementById("tampilUcapan");
+var typed = "";
+var typeIdx = 0;
+var typeTimer = null;
+
+function startTyping(){
+  typeIdx = 0;
+  typed = "";
+  if(typeTimer) clearInterval(typeTimer);
+  typeTimer = setInterval(function(){
+    if(typeIdx < ucap.length){
+      typed += ucap.charAt(typeIdx);
+      msgEl.innerHTML = escapeHtml(typed) + '<span class="cursor">​</span>';
+      typeIdx++;
+    } else {
+      clearInterval(typeTimer);
+    }
+  }, 45);
+}
+
+function showFullMessage(){
+  if(typeTimer) clearInterval(typeTimer);
+  msgEl.innerHTML = escapeHtml(ucap) + '<span class="cursor">​</span>';
+}
+
+// ----- FOTO PENERIMA -----
+function initPhoto(){
+  if(!fotoUrl) return;
+  var frame = document.getElementById("photoFrame");
+  var img = new Image();
+  img.onload = function(){
+    frame.classList.remove("empty");
+    frame.innerHTML = "";
+    img.alt = "Foto " + untuk;
+    frame.appendChild(img);
+  };
+  img.onerror = function(){
+    // hide frame silently if image fails
+    frame.classList.add("empty");
+  };
+  img.src = fotoUrl;
+}
+
+// ----- VIDEO UCAPAN -----
+function extractYouTubeId(url){
+  if(!url) return null;
+  url = url.trim();
+  if(/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function initVideo(){
+  if(!videoUrl) return;
+  var yt = extractYouTubeId(videoUrl);
+  var section = document.getElementById("videoSection");
+  var wrap = document.getElementById("videoWrap");
+  if(yt){
+    wrap.innerHTML = '<iframe src="https://www.youtube.com/embed/' + yt + '?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    section.classList.remove("hidden");
+  } else if(/\.(mp4|webm|ogg|m4v)(\?|$)/i.test(videoUrl)){
+    wrap.innerHTML = '<video controls playsinline preload="metadata"><source src="' + escapeAttr(videoUrl) + '"></video>';
+    section.classList.remove("hidden");
+  }
+  // else: invalid, keep hidden
+}
+
+// ----- COUNTDOWN TIMER -----
+var countdownTarget = null;
+function initCountdown(){
+  if(!tanggalStr) return;
+  // accept YYYY-MM-DD or YYYY-MM-DDTHH:MM
+  var d = new Date(tanggalStr);
+  if(isNaN(d.getTime())) return;
+  countdownTarget = d;
+  document.getElementById("countdown").classList.remove("hidden");
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+function updateCountdown(){
+  if(!countdownTarget) return;
+  var diff = countdownTarget.getTime() - Date.now();
+  var box = document.getElementById("countdown");
+  if(diff <= 0){
+    box.classList.add("expired");
+    document.getElementById("cdLabel").innerText = "🎉 Hari ini hari spesialmu!";
+    document.getElementById("cdGrid").style.display = "none";
+    return;
+  }
+  var days  = Math.floor(diff / 86400000);
+  var hours = Math.floor((diff % 86400000) / 3600000);
+  var mins  = Math.floor((diff % 3600000) / 60000);
+  var secs  = Math.floor((diff % 60000) / 1000);
+  document.getElementById("cdDays").innerText  = pad(days);
+  document.getElementById("cdHours").innerText = pad(hours);
+  document.getElementById("cdMins").innerText  = pad(mins);
+  document.getElementById("cdSecs").innerText  = pad(secs);
+}
+function pad(n){ return n < 10 ? "0" + n : "" + n; }
+
+// ----- GUESTBOOK -----
+function cardId(){
+  var uid = params.get("uid");
+  if(uid) return uid;
+  var s = (untuk + "|" + dari + "|" + ucap).slice(0, 80);
+  var h = 0;
+  for(var i = 0; i < s.length; i++){
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  }
+  return "c" + Math.abs(h).toString(36);
+}
+var GB_KEY = "wishlink_gb_" + cardId();
+
+function getComments(){
+  try { return JSON.parse(localStorage.getItem(GB_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function saveComments(arr){
+  try { localStorage.setItem(GB_KEY, JSON.stringify(arr)); }
+  catch(e){ /* quota / private mode */ }
+}
+function addComment(name, msg){
+  var c = getComments();
+  var id = Date.now() + "-" + Math.random().toString(36).slice(2,8);
+  c.push({id:id, name:name, msg:msg, time:new Date().toISOString()});
+  saveComments(c);
+  renderComments();
+}
+function delComment(id){
+  var c = getComments().filter(function(x){ return x.id !== id; });
+  saveComments(c);
+  renderComments();
+  showToast("🗑️ Ucapan dihapus");
+}
+function renderComments(){
+  var c = getComments();
+  var list = document.getElementById("gbList");
+  var count = document.getElementById("gbCount");
+  if(c.length === 0){
+    list.innerHTML = '<div class="gb-empty">Belum ada ucapan tamu. Jadi yang pertama! ✍️</div>';
+    count.innerText = "";
+    return;
+  }
+  count.innerText = "💬 " + c.length + " ucapan masuk";
+  c.sort(function(a,b){ return new Date(b.time) - new Date(a.time); });
+  list.innerHTML = c.map(function(item){
+    var initial = (item.name||"?").charAt(0).toUpperCase();
+    var ago = timeAgo(item.time);
+    return '<div class="gb-item">'
+      + '<div class="head">'
+      +   '<div class="avatar">' + escapeHtml(initial) + '</div>'
+      +   '<div class="name">' + escapeHtml(item.name||"Anonim") + '</div>'
+      +   '<div class="time">' + ago + '</div>'
+      + '</div>'
+      + '<div class="msg">' + escapeHtml(item.msg) + '</div>'
+      + '</div>';
+  }).join("");
+}
+function timeAgo(iso){
+  var diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if(diff < 60) return "baru saja";
+  if(diff < 3600) return Math.floor(diff/60) + " mnt lalu";
+  if(diff < 86400) return Math.floor(diff/3600) + " jam lalu";
+  if(diff < 2592000) return Math.floor(diff/86400) + " hr lalu";
+  return new Date(iso).toLocaleDateString("id-ID",{day:"numeric",month:"short"});
+}
+function submitComment(e){
+  e.preventDefault();
+  var name = document.getElementById("gbName").value.trim();
+  var msg  = document.getElementById("gbMsg").value.trim();
+  if(!name){ showToast("⚠️ Isi nama dulu ya!"); return false; }
+  if(!msg){ showToast("⚠️ Tulis ucapannya!"); return false; }
+  if(msg.length > 300){ showToast("⚠️ Pesan kepanjangan (max 300)"); return false; }
+  addComment(name, msg);
+  document.getElementById("gbMsg").value = "";
+  updateGbCount();
+  showToast("✅ Ucapan kamu udah masuk!");
+  // small confetti burst as reward
+  burstConfetti(40, canvas.width/2, canvas.height*0.7);
+  return false;
+}
+function updateGbCount(){
+  var v = document.getElementById("gbMsg").value;
+  document.getElementById("gbCharCount").innerText = v.length + " / 300";
+}
+
+function initGuestbook(){
+  if(!gbEnabled){
+    document.getElementById("guestbook").classList.add("hidden");
+    document.getElementById("gbDivider").classList.add("hidden");
+    return;
+  }
+  document.getElementById("guestbook").classList.remove("hidden");
+  renderComments();
+}
+
+// ----- SHARE BUTTONS -----
+function shareWA(){
+  var text = "Lihat ucapan ultah buat " + untuk + "! 🎂";
+  var url = window.location.href;
+  window.open("https://wa.me/?text=" + encodeURIComponent(text + "\n" + url), "_blank");
+}
+function shareFB(){
+  window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.href), "_blank");
+}
+function shareTW(){
+  var text = "Ucapan ultah buat " + untuk + "! 🎂";
+  window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(window.location.href), "_blank");
+}
+function shareCopy(){
+  try {
+    navigator.clipboard.writeText(window.location.href).then(function(){
+      showToast("📋 Link ter-copy!");
+    }).catch(function(){
+      fallbackCopy(window.location.href);
+    });
+  } catch(e){
+    fallbackCopy(window.location.href);
+  }
+}
+function fallbackCopy(text){
+  var ta = document.createElement("textarea");
+  ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); showToast("📋 Link ter-copy!"); }
+  catch(e){ showToast("Gagal copy, copy manual ya"); }
+  document.body.removeChild(ta);
+}
+
+// ----- DEKORASI MELAYANG -----
+var decoLayer = document.getElementById("decoLayer");
+function spawnDeco(){
+  var el = document.createElement("div");
+  el.className = "deco";
+  el.innerText = tema.deco[Math.floor(Math.random()*tema.deco.length)];
+  el.style.left = (Math.random()*100) + "vw";
+  el.style.fontSize = (18 + Math.random()*20) + "px";
+  el.style.animationDuration = (4 + Math.random()*4) + "s";
+  el.style.animationDelay = (Math.random()*0.5) + "s";
+  decoLayer.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 9000);
+}
+var decoInterval = setInterval(spawnDeco, 700);
+for(var i=0;i<5;i++) setTimeout(spawnDeco, i*200);
+
+// ----- CONFETTI (canvas) -----
+var canvas = document.getElementById("confettiCanvas");
+var ctx = canvas.getContext("2d");
+var particles = [];
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+function makeParticle(x, y){
+  return {
+    x: x, y: y,
+    vx: (Math.random()-0.5)*8,
+    vy: Math.random()*-8 - 3,
+    size: 6 + Math.random()*6,
+    color: tema.confetti[Math.floor(Math.random()*tema.confetti.length)],
+    rot: Math.random()*Math.PI*2,
+    vr: (Math.random()-0.5)*0.3,
+    shape: Math.random()<0.5 ? "rect" : "circle"
+  };
+}
+
+function burstConfetti(count, fromX, fromY){
+  count = count || 80;
+  fromX = fromX || canvas.width/2;
+  fromY = fromY || canvas.height/3;
+  for(var i=0;i<count;i++) particles.push(makeParticle(fromX, fromY));
+}
+
+function animateConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(var i=particles.length-1;i>=0;i--){
+    var p = particles[i];
+    p.vy += 0.15;
+    p.vx *= 0.99;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vr;
+    if(p.y > canvas.height+20){ particles.splice(i,1); continue; }
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = Math.max(0, Math.min(1, (canvas.height - p.y)/200));
+    if(p.shape === "rect"){
+      ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0,0,p.size/2,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  requestAnimationFrame(animateConfetti);
+}
+animateConfetti();
+setTimeout(function(){ burstConfetti(120); }, 400);
+
+// ----- LILIN INTERAKTIF -----
+var candleBlown = false;
+function blowCandle(){
+  if(candleBlown) return;
+  candleBlown = true;
+  document.getElementById("flame").style.display = "none";
+  document.getElementById("cakeSvg").classList.add("blown");
+  document.getElementById("cakeHint").innerText = "🎉 Yeay! Lilinnya udah tiup! Semoga semua mimpi-mimpimu jadi nyata!";
+  burstConfetti(200, canvas.width/2, canvas.height*0.35);
+  for(var i=0;i<15;i++) setTimeout(spawnDeco, i*80);
+  startMusic();
+  startTyping();
+}
+
+function bigCelebrate(){
+  burstConfetti(150);
+  for(var i=0;i<10;i++) setTimeout(spawnDeco, i*100);
+  showToast("🎉 Yeay! Selamat ulang tahun!");
+}
+
+// ----- MUSIK (Web Audio API — Happy Birthday melody) -----
+var audioCtx = null;
+var musicPlaying = false;
+var musicTimers = [];
+
+var MELODY = [
+  [392.00,0.75],[392.00,0.25],[440.00,1],[392.00,1],[523.25,1],[493.88,2],
+  [392.00,0.75],[392.00,0.25],[440.00,1],[392.00,1],[587.33,1],[523.25,2],
+  [392.00,0.75],[392.00,0.25],[784.00,1],[659.25,1],[523.25,1],[493.88,1],[440.00,1],
+  [698.46,0.75],[698.46,0.25],[659.25,1],[523.25,1],[587.33,1],[523.25,2]
+];
+var BEAT = 0.35;
+
+function initAudio(){
+  if(!audioCtx){
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ return false; }
+  }
+  if(audioCtx.state === "suspended") audioCtx.resume();
+  return true;
+}
+
+function playMelodyOnce(){
+  if(!audioCtx) return 0;
+  var t = audioCtx.currentTime;
+  MELODY.forEach(function(note){
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = tema.music;
+    osc.frequency.value = note[0];
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.15, t + 0.03);
+    gain.gain.linearRampToValueAtTime(0, t + note[1]*BEAT - 0.05);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + note[1]*BEAT);
+    t += note[1]*BEAT;
+  });
+  return t - audioCtx.currentTime;
+}
+
+function startMusic(){
+  if(!initAudio()) return;
+  if(musicPlaying) return;
+  musicPlaying = true;
+  document.getElementById("musicToggle").classList.remove("off");
+  document.getElementById("musicToggle").innerText = "🔊";
+  var totalDur = playMelodyOnce();
+  function loop(){
+    if(!musicPlaying) return;
+    playMelodyOnce();
+    musicTimers.push(setTimeout(loop, totalDur*1000));
+  }
+  musicTimers.push(setTimeout(loop, totalDur*1000));
+}
+
+function stopMusic(){
+  musicPlaying = false;
+  musicTimers.forEach(clearTimeout);
+  musicTimers = [];
+  document.getElementById("musicToggle").classList.add("off");
+  document.getElementById("musicToggle").innerText = "🔇";
+}
+
+function toggleMusic(){
+  if(musicPlaying) stopMusic();
+  else startMusic();
+}
+
+// ----- TOAST -----
+function showToast(msg){
+  var t = document.createElement("div");
+  t.className = "toast show";
+  t.innerText = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.classList.remove("show"); }, 2400);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 2800);
+}
+
+// ----- UTIL -----
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function escapeAttr(s){
+  return String(s).replace(/"/g, "&quot;");
+}
+
+// ----- HINT -----
+setTimeout(function(){
+  if(!candleBlown){
+    showToast("👆 Klik kuenya buat tiup lilin & mulai kejutan!");
+  }
+}, 8000);
+
+// fallback: tampilkan pesan langsung kalau user gak klik lilin dalam 30s
+setTimeout(function(){
+  if(!candleBlown){
+    showFullMessage();
+    startMusic();
+  }
+}, 30000);
+
+// ----- INIT FITUR BARU -----
+initPhoto();
+initVideo();
+initCountdown();
+initGuestbook();
+
+</script>
+
+</body>
+</html>

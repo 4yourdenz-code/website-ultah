@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin WishLink — Generator Link Ucapan</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="center mb-3">
+      <div style="font-size:2.4rem">🔐</div>
+      <h2>Admin WishLink</h2>
+      <p class="tagline">Masuk buat generate link ucapan</p>
+    </div>
+    <div class="field">
+      <label for="pwd">Password Admin</label>
+      <input type="password" id="pwd" placeholder="Masukkan password" autocomplete="off">
+      <p class="hint">Default: <b>admin123</b> (ganti di kode — lihat README)</p>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()">Masuk →</button>
+    <p class="center mt-2"><a href="index.html" class="text-muted" style="font-size:.85rem">← Kembali ke landing page</a></p>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<div id="adminScreen" class="hidden">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <a href="index.html" class="brand"><span class="logo">🎂</span> WishLink <span class="badge">Admin</span></a>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">🔒 Logout</button>
+    </div>
+
+    <div class="admin-grid">
+      <!-- ====== KIRI: FORM ====== -->
+      <div class="card">
+        <h3>1. Pilih Tema</h3>
+        <div id="temaChips" style="margin:10px 0 16px">
+          <span class="chip active" data-tema="romantis" onclick="pilihTema('romantis')">💖 Romantis</span>
+          <span class="chip" data-tema="lucu" onclick="pilihTema('lucu')">🎉 Lucu</span>
+          <span class="chip" data-tema="elegan" onclick="pilihTema('elegan')">✨ Elegan</span>
+          <span class="chip" data-tema="anak" onclick="pilihTema('anak')">🧸 Anak</span>
+          <span class="chip" data-tema="keluarga" onclick="pilihTema('keluarga')">💐 Keluarga</span>
+        </div>
+
+        <h3>2. Isi Data Wajib</h3>
+        <div class="field">
+          <label for="untuk">Untuk Siapa? <span class="text-muted">*</span></label>
+          <input type="text" id="untuk" placeholder="contoh: Cantikku" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label for="dari">Dari Siapa? <span class="text-muted">*</span></label>
+          <input type="text" id="dari" placeholder="contoh: Sayangmu" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label for="ucapan">Isi Ucapan <span class="text-muted">*</span></label>
+          <textarea id="ucapan" placeholder="Tulis ucapannya di sini..." oninput="updatePreview()"></textarea>
+          <p class="hint" id="charCount">0 karakter</p>
+        </div>
+
+        <h3 style="margin-top:18px">3. Fitur Tambahan (Opsional)</h3>
+        <p class="tagline" style="margin-bottom:12px">Boleh dikosongin. Fitur ini bikin ucapan makin spesial ✨</p>
+
+        <div class="field">
+          <label for="foto">📷 URL Foto Penerima</label>
+          <input type="url" id="foto" placeholder="https://... (foto penerima, tampil bulat di kartu)" oninput="updatePreview()">
+          <p class="hint">Harus URL publik (langsung ke file .jpg/.png). Upload foto dulu ke Imgur / Google Drive (public) kalau perlu.</p>
+        </div>
+
+        <div class="field">
+          <label for="video">🎥 URL Video Ucapan</label>
+          <input type="url" id="video" placeholder="https://youtube.com/watch?v=... atau link .mp4" oninput="updatePreview()">
+          <p class="hint">Support YouTube (link biasa / youtu.be / shorts) atau langsung file .mp4/.webm</p>
+        </div>
+
+        <div class="field">
+          <label for="tanggal">⏰ Tanggal & Jam Ultah (Countdown)</label>
+          <input type="datetime-local" id="tanggal" oninput="updatePreview()">
+          <p class="hint">Kosongin kalau gak mau countdown. Format otomatis dari input ini.</p>
+        </div>
+
+        <div class="field">
+          <label class="toggle">
+            <input type="checkbox" id="guestbook" checked onchange="updatePreview()">
+            <span class="track"></span>
+            <span class="toggle-label">💌 Aktifkan Buku Tamu (guestbook)</span>
+          </label>
+          <p class="hint">Tamu bisa tulis ucapan tambahan di kartu. Disimpan di browser masing-masing (lihat README buat shared backend).</p>
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="buatLink()" style="margin-top:8px">⚙️ Buat Link</button>
+      </div>
+
+      <!-- ====== KANAN: PREVIEW + HASIL ====== -->
+      <div>
+        <div class="preview-pane">
+          <div class="preview-label">📱 Preview Real-time</div>
+          <div class="preview-frame" id="previewFrame">
+            <div class="prev-photo empty" id="prevPhoto">no foto</div>
+            <div style="font-size:2.2rem;margin-bottom:6px" id="prevEmoji">💖</div>
+            <h2 style="font-size:1.3rem;margin-bottom:6px">Hai, <span id="prevUntuk">Cantikku</span>!</h2>
+            <p id="prevUcapan" style="font-size:.92rem;color:var(--text-soft);min-height:2em;line-height:1.6">Tulis ucapan dulu di kiri ✍️</p>
+            <div id="prevCountdown" class="prev-countdown-mini" style="display:none"></div>
+            <div id="prevVideo" class="prev-video-hint" style="display:none">🎥 Ada video ucapan</div>
+            <p style="font-size:.8rem;color:var(--muted);margin-top:12px">Dari: <b id="prevDari" style="color:var(--primary)">Sayangmu</b></p>
+            <div id="prevGb" class="prev-gb-indicator">💌 Buku tamu aktif</div>
+          </div>
+        </div>
+
+        <!-- Hasil generate -->
+        <div id="hasil" class="card hidden mt-3">
+          <h3>✅ Link Jadi!</h3>
+          <div class="field">
+            <input type="text" id="linkHasil" readonly class="input-readonly">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-dark btn-sm" style="flex:1;min-width:120px" onclick="copyLink()">📋 Copy Link</button>
+            <a id="bukaLink" target="_blank" style="flex:1;min-width:120px"><button class="btn btn-primary btn-sm" style="width:100%">🔗 Buka / Test</button></a>
+          </div>
+
+          <div class="qr-wrap">
+            <p class="preview-label" style="margin-top:14px">QR Code (scan buat buka di HP)</p>
+            <img id="qrImg" alt="QR Code" style="display:none">
+          </div>
+
+          <button class="btn btn-ghost btn-sm btn-block mt-2" onclick="saveToHistory()">💾 Simpan ke Riwayat</button>
+        </div>
+
+        <!-- Riwayat -->
+        <div class="card mt-3">
+          <h3>🕘 Riwayat Link</h3>
+          <p class="tagline">Tersimpan otomatis di browser ini (localStorage)</p>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   ADMIN WISHLINK v2 — Generator Link Ucapan + Fitur Tambahan
+   ============================================================ */
+
+// ----- KONFIGURASI -----
+var ADMIN_PASSWORD = "admin123";     // ← GANTI PASSWORD DI SINI (lihat README)
+var HISTORY_KEY = "wishlink_history";
+var HISTORY_MAX = 10;
+
+// ----- STATE -----
+var temaAktif = "romantis";
+var lastLink = "";
+var lastData = {};
+
+var TEMA_DATA = {
+  romantis:  {emoji:"💖", label:"Romantis",  bg:"#ffe0e9", text:"#2b1426"},
+  lucu:      {emoji:"🎉", label:"Lucu",      bg:"#fff3b0", text:"#2b1426"},
+  elegan:    {emoji:"✨", label:"Elegan",    bg:"#2c2c2c", text:"#f5e6c8"},
+  anak:      {emoji:"🧸", label:"Anak-anak", bg:"#a8e6cf", text:"#1a3a2e"},
+  keluarga:  {emoji:"💐", label:"Keluarga",  bg:"#d4e4ff", text:"#2b1f4a"}
+};
+
+// ----- LOGIN -----
+function doLogin(){
+  var pwd = document.getElementById("pwd").value;
+  if(pwd === ADMIN_PASSWORD){
+    sessionStorage.setItem("wishlink_admin","1");
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("adminScreen").classList.remove("hidden");
+    renderHistory();
+    updatePreview();
+  } else {
+    showToast("❌ Password salah!");
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem("wishlink_admin");
+  document.getElementById("adminScreen").classList.add("hidden");
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("pwd").value = "";
+}
+
+if(sessionStorage.getItem("wishlink_admin") === "1"){
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("adminScreen").classList.remove("hidden");
+}
+
+document.getElementById("pwd").addEventListener("keydown", function(e){
+  if(e.key === "Enter") doLogin();
+});
+
+// ----- PILIH TEMA -----
+function pilihTema(t){
+  temaAktif = t;
+  document.querySelectorAll(".chip").forEach(function(c){
+    c.classList.toggle("active", c.dataset.tema === t);
+  });
+  updatePreview();
+}
+
+// ----- PREVIEW REAL-TIME -----
+function updatePreview(){
+  var untuk = document.getElementById("untuk").value || "Cantikku";
+  var dari  = document.getElementById("dari").value  || "Sayangmu";
+  var ucap  = document.getElementById("ucapan").value || "Tulis ucapan dulu di kiri ✍️";
+  var foto  = document.getElementById("foto").value.trim();
+  var video = document.getElementById("video").value.trim();
+  var tgl   = document.getElementById("tanggal").value;
+  var gb    = document.getElementById("guestbook").checked;
+  var td    = TEMA_DATA[temaAktif];
+
+  document.getElementById("prevEmoji").innerText = td.emoji;
+  document.getElementById("prevUntuk").innerText = untuk;
+  document.getElementById("prevDari").innerText  = dari;
+  document.getElementById("prevUcapan").innerText = ucap;
+
+  var frame = document.getElementById("previewFrame");
+  frame.style.background = td.bg;
+  frame.style.color = td.text;
+  frame.querySelector("h2").style.color = td.text;
+  frame.querySelector("p").style.color = td.text;
+
+  // photo preview
+  var prevPhoto = document.getElementById("prevPhoto");
+  if(foto){
+    prevPhoto.classList.remove("empty");
+    prevPhoto.innerHTML = '<img src="' + escapeAttr(foto) + '" alt="" onerror="this.parentNode.classList.add(\'empty\');this.parentNode.innerText=\'gagal load\'">';
+  } else {
+    prevPhoto.classList.add("empty");
+    prevPhoto.innerText = "no foto";
+  }
+
+  // video indicator
+  var prevVid = document.getElementById("prevVideo");
+  prevVid.style.display = video ? "block" : "none";
+
+  // countdown indicator
+  var prevCd = document.getElementById("prevCountdown");
+  if(tgl){
+    var d = new Date(tgl);
+    if(!isNaN(d.getTime())){
+      var diff = d.getTime() - Date.now();
+      if(diff > 0){
+        var days = Math.floor(diff/86400000);
+        prevCd.innerText = "⏰ Countdown: " + days + " hari lagi (" + d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}) + ")";
+      } else {
+        prevCd.innerText = "🎉 Hari-H!";
+      }
+      prevCd.style.display = "block";
+    } else {
+      prevCd.style.display = "none";
+    }
+  } else {
+    prevCd.style.display = "none";
+  }
+
+  // guestbook indicator
+  document.getElementById("prevGb").innerText = gb ? "💌 Buku tamu aktif" : "💌 Buku tamu nonaktif";
+  document.getElementById("prevGb").style.opacity = gb ? "1" : "0.4";
+
+  // char count
+  var cc = document.getElementById("ucapan").value.length;
+  document.getElementById("charCount").innerText = cc + " karakter" + (cc > 300 ? " (disarankan max 300)" : "");
+}
+
+// ----- GENERATE LINK -----
+function buatLink(){
+  var untuk = document.getElementById("untuk").value.trim();
+  var dari  = document.getElementById("dari").value.trim();
+  var ucap  = document.getElementById("ucapan").value.trim();
+
+  if(!untuk || !dari || !ucap){
+    showToast("⚠️ Isi semua field wajib dulu!");
+    return;
+  }
+
+  var foto  = document.getElementById("foto").value.trim();
+  var video = document.getElementById("video").value.trim();
+  var tgl   = document.getElementById("tanggal").value;
+  var gb    = document.getElementById("guestbook").checked;
+
+  // Auto-detect base URL
+  var base = window.location.origin + window.location.pathname.replace(/buat\.html.*/,"");
+  var url = base + "/ucapan.html?tema=" + encodeURIComponent(temaAktif)
+          + "&untuk=" + encodeURIComponent(untuk)
+          + "&dari="  + encodeURIComponent(dari)
+          + "&ucapan=" + encodeURIComponent(ucap);
+
+  // append optional params only when set (keep URL short)
+  if(foto)  url += "&foto="  + encodeURIComponent(foto);
+  if(video) url += "&video=" + encodeURIComponent(video);
+  if(tgl)   url += "&tanggal=" + encodeURIComponent(tgl);
+  if(!gb)   url += "&guestbook=0";
+
+  lastLink = url;
+  lastData = {untuk:untuk, dari:dari, tema:temaAktif, foto:foto, video:video, tanggal:tgl, guestbook:gb};
+
+  document.getElementById("linkHasil").value = url;
+  document.getElementById("bukaLink").href = url;
+  document.getElementById("hasil").classList.remove("hidden");
+
+  // QR Code
+  var qr = document.getElementById("qrImg");
+  qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=" + encodeURIComponent(url);
+  qr.style.display = "block";
+
+  showToast("✅ Link berhasil dibuat!");
+  saveToHistory(true);
+}
+
+// ----- COPY LINK -----
+function copyLink(){
+  var inp = document.getElementById("linkHasil");
+  inp.select();
+  inp.setSelectionRange(0,99999);
+  try {
+    navigator.clipboard.writeText(inp.value).then(function(){
+      showToast("📋 Link ter-copy!");
+    }).catch(function(){
+      document.execCommand("copy");
+      showToast("📋 Link ter-copy!");
+    });
+  } catch(e){
+    document.execCommand("copy");
+    showToast("📋 Link ter-copy!");
+  }
+}
+
+// ----- HISTORY (localStorage) -----
+function getHistory(){
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+
+function saveToHistory(silent){
+  if(!lastLink) return;
+  var hist = getHistory();
+  hist = hist.filter(function(h){ return h.link !== lastLink; });
+  hist.unshift({
+    link: lastLink,
+    untuk: lastData.untuk || "",
+    dari:  lastData.dari  || "",
+    tema:  lastData.tema  || temaAktif,
+    foto:  lastData.foto  ? "📷" : "",
+    video: lastData.video ? "🎥" : "",
+    tanggal: lastData.tanggal || "",
+    gb:    lastData.guestbook === false ? "off" : "on",
+    waktu: new Date().toISOString()
+  });
+  if(hist.length > HISTORY_MAX) hist = hist.slice(0,HISTORY_MAX);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  renderHistory();
+  if(!silent) showToast("💾 Disimpan ke riwayat");
+}
+
+function renderHistory(){
+  var hist = getHistory();
+  var box = document.getElementById("historyList");
+  if(hist.length === 0){
+    box.innerHTML = '<div class="history-empty">Belum ada link tersimpan. Buat link dulu ya 👆</div>';
+    return;
+  }
+  box.innerHTML = hist.map(function(h, idx){
+    var d = new Date(h.waktu);
+    var tgl = d.toLocaleDateString("id-ID",{day:"numeric",month:"short"}) + " " + d.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"});
+    var td = TEMA_DATA[h.tema] || TEMA_DATA.romantis;
+    var badges = [];
+    if(h.foto)  badges.push(h.foto);
+    if(h.video) badges.push(h.video);
+    if(h.tanggal) badges.push("⏰");
+    if(h.gb === "off") badges.push("💌off");
+    var badgeStr = badges.length ? " <small style='color:var(--muted)'>" + badges.join(" ") + "</small>" : "";
+    return '<div class="history-item">'
+      + '<span style="font-size:1.2rem">' + td.emoji + '</span>'
+      + '<div class="meta"><b>' + escapeHtml(h.untuk||"-") + ' ← ' + escapeHtml(h.dari||"-") + badgeStr + '</b><small>' + tgl + '</small></div>'
+      + '<button onclick="copyHistory('+idx+')" title="Copy">📋</button>'
+      + '<button onclick="openHistory('+idx+')" title="Buka">🔗</button>'
+      + '<button onclick="delHistory('+idx+')" title="Hapus">🗑️</button>'
+      + '</div>';
+  }).join("");
+}
+
+function copyHistory(idx){
+  var h = getHistory()[idx];
+  if(!h) return;
+  navigator.clipboard.writeText(h.link).then(function(){
+    showToast("📋 Link lama ter-copy!");
+  }).catch(function(){
+    showToast("Gagal copy, buka manual aja ya");
+  });
+}
+
+function openHistory(idx){
+  var h = getHistory()[idx];
+  if(h) window.open(h.link, "_blank");
+}
+
+function delHistory(idx){
+  var hist = getHistory();
+  hist.splice(idx,1);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+  renderHistory();
+  showToast("🗑️ Dihapus");
+}
+
+// ----- UTIL -----
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function escapeAttr(s){return String(s).replace(/"/g,"&quot;");}
+
+function showToast(msg){
+  var t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+}
+
+// init
+renderHistory();
+updatePreview();
+</script>
+
+</body>
+</html>
