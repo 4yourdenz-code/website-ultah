@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buat Ucapan - Admin</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.pilih-tema{display:flex;gap:10px;justify-content:center}
+.pilih-tema button{flex:1;opacity:0.5}
+.pilih-tema button.aktif{opacity:1;border:3px solid #000;transform:scale(1.05)}
+</style>
+</head><body>
+<div class="container">
+  <h1>Buat Link Ucapan</h1>
+  <p>Khusus Admin (Kamu doang)</p>
+
+  <h3>1. Pilih Tema:</h3>
+  <div class="pilih-tema">
+    <button id="btnRomantis" class="aktif" onclick="pilihTema('romantis')" style="background:#ff4d6d">💖 ROMANTIS</button>
+    <button id="btnLucu" onclick="pilihTema('lucu')" style="background:#ff9f00">🎉 LUCU / HEBOH</button>
+  </div>
+  <p id="infoTema">Tema dipilih: <b>Romantis</b></p>
+
+  <h3>2. Isi Data:</h3>
+  <input id="untuk" placeholder="Untuk siapa? (cth: Rani)">
+  <input id="dari" placeholder="Dari siapa? (cth: Sayangmu)">
+  <textarea id="ucapan" placeholder="Tulis ucapan..."></textarea>
+
+  <button onclick="buatLink()" style="background:#000">BUAT LINK ➡️</button>
+
+  <div id="hasil" style="display:none">
+    <h3>Link Jadi:</h3>
+    <input id="linkHasil" readonly>
+    <a id="bukaLink" target="_blank"><button style="background:#25D366">BUKA / TEST LINK</button></a>
+    <p>Copy link di atas, kirim ke customer!</p>
+  </div>
+</div>
+
+<script>
+let tema = 'romantis';
+function pilihTema(t){
+  tema = t;
+  document.getElementById('btnRomantis').classList.remove('aktif');
+  document.getElementById('btnLucu').classList.remove('aktif');
+  if(t==='romantis'){
+    document.getElementById('btnRomantis').classList.add('aktif');
+    document.getElementById('infoTema').innerHTML = 'Tema dipilih: <b>Romantis</b>';
+  } else {
+    document.getElementById('btnLucu').classList.add('aktif');
+    document.getElementById('infoTema').innerHTML = 'Tema dipilih: <b>Lucu / Heboh</b>';
+  }
+}
+function buatLink(){
+  const untuk = document.getElementById('untuk').value;
+  const dari = document.getElementById('dari').value;
+  const ucapan = document.getElementById('ucapan').value;
+  if(!untuk || !dari || !ucapan){ alert('Isi semua dulu!'); return; }
+  const url = `ucapan.html?tema=${tema}&untuk=${encodeURIComponent(untuk)}&dari=${encodeURIComponent(dari)}&ucapan=${encodeURIComponent(ucapan)}`;
+  document.getElementById('hasil').style.display='block';
+  document.getElementById('linkHasil').value = url;
+  document.getElementById('bukaLink').href = url;
+}
+</script>
+</body></html>
